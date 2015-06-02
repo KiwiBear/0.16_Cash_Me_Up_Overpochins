@@ -649,6 +649,11 @@ if(isNil "dayz_zedsAttackVehicles") then {
 };
 
 // update objects
+//Origins
+Ori_VehiclesList = ["ori_ScrapBuggy","ori_survivorBus","ori_vil_lada_2105_rust","ori_poldek_black","ori_poldek","ori_rth_originsmod_bathmobile","ori_transit","ori_vil_originsmod_lublin_truck","ori_vil_originsmod_truck_civ","ori_vil_originsmod_truck_civ","ori_originsmod_pickupoldfuel","ori_p85_originsmod_cucv_pickup","ori_originsmod_pickupold"];                       
+Ori_VehicleUpgrades = ["pluhPredni","kolaOchrana","oknaOchrana","predniOknoOchrana"];
+
+
 dayz_updateObjects = ["Plane","Tank","Car", "Helicopter", "Motorcycle", "Ship", "TentStorage", "VaultStorage","LockboxStorage","OutHouse_DZ","Wooden_shed_DZ","WoodShack_DZ","StorageShed_DZ","GunRack_DZ","WoodCrate_DZ","Scaffolding_DZ"];
 dayz_disallowedVault = ["TentStorage", "BuiltItems","ModularItems","DZE_Base_Object"];
 dayz_reveal = ["AllVehicles","WeaponHolder","Land_A_tent","BuiltItems","ModularItems","DZE_Base_Object"];

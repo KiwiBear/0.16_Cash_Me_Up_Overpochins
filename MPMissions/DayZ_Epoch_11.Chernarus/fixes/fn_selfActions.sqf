@@ -1072,6 +1072,36 @@ if (TakeClothesScript) then {
 				
 				s_player_repairActions set [count s_player_repairActions,_menu];
 				s_player_repairActions set [count s_player_repairActions,_menu1];
+				 if (_typeOfCursorTarget in Ori_VehiclesList) then {
+            _cfg = configFile >> "CfgVehicles" >> _typeOfCursorTarget >> "AnimationSources";
+            _tc = count _cfg;
+            _part = "PartGeneric";
+           
+            for "_mti" from 0 to _tc-1 do {
+                _mt = (_cfg select _mti);
+                _st = getText(_mt >> "source");
+                _anim_array = Ori_VehicleUpgrades;
+                if (_st in _anim_array) then {
+                    _statuss = _cursorTarget getVariable [_st,1];
+                        if (_statuss == 1) then {
+                            _num = _anim_array find _st;
+                            _upgrade = _anim_array select _num;
+                            _upgradeName = "";
+                                    switch _upgrade do {
+                                    case "pluhPredni" : {_upgradeName = "Front Plow";};
+                                    case "kolaOchrana" : {_upgradeName = "Wheel Guards";};
+                                    case "oknaOchrana" : {_upgradeName = "Window Guards";};
+                                    case "predniOknoOchrana" : {_upgradeName = "Windshield Guards";};
+                                };
+                            _color = "color='#ff0000'";
+                            _stname = format["Upgrade %1",_upgradeName];
+                            _string = format["<t %2>%1</t>", _stname,_color];
+                        _handle = dayz_myCursorTarget addAction [_string, "origins\ori_upgrade.sqf",[_cursorTarget,_part,_st], 0, false, true, "",""];
+                        s_player_repairActions set [count s_player_repairActions,_handle];
+                    };
+                };
+            };
+        };
 				s_player_repair_crtl = 1;
 			} else {
 				
