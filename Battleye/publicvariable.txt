@@ -1,4 +1,4 @@
 //new
-5 "" !"DBUpdClient" !"DBPV_PubUnit" !"admin_Log" "!"axeLampObjects" !"currentInvites" !"DZE_WMOD_INVENTORY" !"PVDZE_" !"norrn" !"usec" !="remExField" !="remExFP" !="drn_AskServerDynamicWeatherEventArgs" !="BIS_effects_gepv" !="PVDZ_Server_Simulation" !="PVOZ_adminSkin"
+5 "" !"DBUpdClient" !"DBPV_PubUnit" !"admin_Log" "!"axeLampObjects" !"currentInvites" !"DZE_WMOD_INVENTORY" !"PVDZE_" !"norrn" !"usec" !="remExField" !="remExFP" !="drn_AskServerDynamicWeatherEventArgs" !="BIS_effects_gepv" !="PVDZ_Server_Simulation" !="PVOZ_adminSkin" !="owner_B1" !="owner_B2" !="owner_B3" !="owner_H1" !="owner_H2" !="owner_H3" !="owner_SG" !="owner_LG" !="owner_KING" !="owner_SH" !="OriginsLockUnlock"
 5 "remExFP" !="\"remExFP\" = \[,,\"per\",\"execVM\",\"ca\\Modules\\Functions\\init.sqf\"\]" !"\[,,\"per\",\"execVM\",\"ca\\Modules\\Functions\\init.sqf\"\]"
 5 "dayzInfectedCamps"

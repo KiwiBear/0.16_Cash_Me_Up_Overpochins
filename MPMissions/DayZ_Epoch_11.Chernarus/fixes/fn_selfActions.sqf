@@ -232,6 +232,160 @@ if (!DZE_ForceNameTagsOff) then {
 		};
 	};
 };
+if(DZE_Origins_Building_System) then {
+	if(isnil "s_player_build_origins_house") then {s_player_build_origins_house = -1;};
+	if(isnil "s_player_build_origins_garage") then {s_player_build_origins_garage = -1;};
+	if(isnil "s_player_build_origins_stronghold") then {s_player_build_origins_stronghold = -1;};
+	if(isnil "s_player_origins_unlock") then {s_player_origins_unlock = -1;};
+	if(isnil "s_player_origins_stronghold_doors") then {s_player_origins_stronghold_doors = -1;};
+	_cursorTarget = cursorTarget;
+	if (!isNull _cursorTarget) then {
+		_typeOfCursorTarget = (typeOf _cursorTarget);
+		if(_typeOfCursorTarget == DZE_Origins_Container ) then {
+			if((player distance _cursorTarget) < DZE_Origins_Build_Distance) then {
+				private["_humanity","_playerUID","_hasLevel1","_hasLevel2","_hasLevel3","_hasSG","_hasLG","_hasKING","_hasSH","_canBuildHouse","_houselevel","_humanityNeed","_actionText","_classname","_neededMaterials","_canBuildSH","_canBuildGarage"];
+				_humanity = player getVariable["humanity",0];
+				_playerUID = dayz_playerUID;
+				_hasLevel1 = (_playerUID in owner_H1 || _playerUID in owner_B1);
+				_hasLevel2 = (_playerUID in owner_H2 || _playerUID in owner_B2);
+				_hasLevel3 = (_playerUID in owner_H3 || _playerUID in owner_B3);
+				_hasSG = (_playerUID in owner_SG);
+				_hasLG = (_playerUID in owner_LG);
+				_hasKING = (_playerUID in owner_KING);
+				_hasSH = (_playerUID in owner_SH);
+				
+				{
+					_houselevel = _x select 0;
+					_humanityNeed = _x select 1;
+					_actionText = _x select 2;
+					_classname = _x select 3;
+					_neededMaterials = _x select 4;
+					_canBuildHouse = false;
+					_canBuildGarage = false;
+					_canBuildSH = false;
+					
+					if((_humanityNeed > 0 && _humanity >= _humanityNeed) || (_humanityNeed < 0 && _humanity <= _humanityNeed)) then {
+						if(_houselevel in ["H1","B1"] && !_hasLevel1) then {
+							_canBuildHouse = true;
+						};
+						if(_houselevel in ["H2","B2"] && !_hasLevel2) then {
+							_canBuildHouse = true;
+						};
+						if(_houselevel in ["H3","B3"] && !_hasLevel3) then {
+							_canBuildHouse = true;
+						};
+						if(_houselevel in ["SGH","SGB"] && _hasLevel1 && !_hasSG) then {
+							_canBuildGarage = true;
+						};
+						if(_houselevel in ["LGH","LGB"] && _hasLevel3 && !_hasLG) then {
+							_canBuildGarage = true;
+						};
+						if(_houselevel in ["KINGH","KINGB"] && _hasLevel3 && _hasLG && !_hasKING) then {
+							_canBuildGarage = true;
+						};	
+						if(_houselevel in ["SHH","SHB"] && _hasLevel1 && _hasLevel2 && _hasLevel3 && !_hasSH) then {
+							_canBuildSH = true;
+						};
+					};
+					
+					if(_canBuildHouse) then {
+						if(s_player_build_origins_house < 0) then {
+							s_player_build_origins_house = player addAction ["Build " + _actionText, "origins\player_build.sqf", [_cursorTarget, _houselevel, _classname, _neededMaterials, _actionText]];
+						};
+					};
+					if(_canBuildGarage) then {
+						if(s_player_build_origins_garage < 0) then {
+							s_player_build_origins_garage = player addAction ["Build " + _actionText, "origins\player_build.sqf", [_cursorTarget, _houselevel, _classname, _neededMaterials, _actionText]];
+						};
+					};
+					if(_canBuildSH) then {
+						if(s_player_build_origins_stronghold < 0) then {
+							s_player_build_origins_stronghold = player addAction ["Build " + _actionText, "origins\player_build.sqf", [_cursorTarget, _houselevel, _classname, _neededMaterials, _actionText]];
+						};
+					};
+					
+				} forEach DZE_Origins_Build_HousesGarages;
+			} else {
+				[1] call origins_removeActions;
+			};
+		};
+		
+		if(_typeOfCursorTarget in DZE_Origins_Buildings && (player distance _cursorTarget) < DZE_Origins_LockUnlock_Distance) then {
+			private["_ownerUID","_ownerName","_playerUID","_state","_openClose"];
+			_playerUID = dayz_playerUID;
+			_ownerUID = _cursorTarget getVariable ["OwnerUID","0"];
+			_ownerName = _cursorTarget getVariable ["OwnerName","0"];
+			
+			if(_playerUID != _ownerUID && !(_typeOfCursorTarget in DZE_Origins_Stronghold)) exitWith {
+				cutText [format["This house was built by %1", _ownerName], "PLAIN DOWN",5];
+				sleep 5;
+			};
+			_state = (_cursorTarget getVariable ["CanBeUpdated",false]);
+			if(_typeOfCursorTarget in DZE_Origins_Stronghold && _state) then {
+				private["_strongholdDoorsOpen"];
+				_strongholdDoorsOpen = (_cursorTarget getVariable ["DoorsOpen",false]);
+				if(_strongholdDoorsOpen) then {
+					if(s_player_origins_stronghold_doors < 0) then {
+						s_player_origins_stronghold_doors = player addAction [ "Close Doors","origins\origins_strongholdDoors.sqf",[_cursorTarget,0]];
+					};
+				} else {
+					if(s_player_origins_stronghold_doors < 0)then {
+						s_player_origins_stronghold_doors = player addAction [ "Open Doors","origins\origins_strongholdDoors.sqf",[_cursorTarget,1]];
+					};
+				};
+			} else {
+				[3] call origins_removeActions;
+			};
+			
+			if(s_player_origins_unlock < 0) then {
+				_matched = false;
+				{
+					if(_typeOfCursorTarget == (_x select 0)) then {
+						if(_state) then {
+							_openClose = format["Lock %1", _X select 1];
+						} else {
+							_openClose = format["Unlock %1", _X select 1];
+						};
+						_matched = true;
+					};
+					if (_matched) exitWith {
+						s_player_origins_unlock = player addAction [_openClose, "origins\player_lockUnlock.sqf", [_cursorTarget,_typeOfCursorTarget,_state]];
+					};
+				} count DZE_Origins_NameLookup;
+			};
+		} else {
+			[2] call origins_removeActions;
+		};
+	} else {
+		[0] call origins_removeActions;
+	};
+};
+
+    //Sleep
+    if(typeOf(_cursorTarget) in DZE_Origins_Buildings) then {
+        if ((s_house_sleep < 0) and (player distance _cursorTarget < 3)) then {
+            s_house_sleep = player addAction [localize "str_actions_self_sleep", "origins\player_sleep.sqf",_cursorTarget, 0, false, true, "",""];
+        };
+    } else {
+        player removeAction s_house_sleep;
+        s_house_sleep = -1;
+    };
+	
+	//Submarine Submerging
+if (_inVehicle and (_vehicle isKindOf "ori_submarine")) then {
+   if (sub_up < 0) then {
+     thesub = _vehicle;
+	 sub_down = thesub addAction ["Rise","origins\sub_down.sqf","",5,false,true];
+     sub_up = thesub addAction ["Submerge","origins\sub_up.sqf","",5,false,true];
+   };
+} else {
+   thesub removeAction sub_up;
+   sub_up = -1;
+   thesub removeAction sub_down;
+   sub_down = -1;
+};
+
+
 if(_isPZombie) then {
 	if (s_player_callzombies < 0) then {
 		s_player_callzombies = player addAction [localize "STR_EPOCH_ACTIONS_RAISEHORDE", "\z\addons\dayz_code\actions\call_zombies.sqf",player, 5, true, false, "",""];
@@ -470,7 +624,46 @@ if (!isNull cursorTarget && !_inVehicle && !_isPZombie && (player distance curso
 		player removeAction s_player_deleteBuild;
 		s_player_deleteBuild = -1;
 	};
-	
+	//allow demolition of Origins Housing
+    if (typeOf(vehicle player)=="ori_excavator") then
+    {
+        if (bucketOut < 0) then {
+            ExcavateVeh = _vehicle;
+            bucketOut = ExcavateVeh addAction ["Bucket Out","origins\bucketOut.sqf","",5,false,true];
+        };
+        if(bucketIn < 0) then {
+            ExcavateVeh = _vehicle;
+            bucketIn = ExcavateVeh addAction ["Bucket In","origins\bucketIn.sqf","",5,false,true];
+        };
+        _nearestBuildList = nearestObjects [_vehicle, DZE_Origins_Buildings, 20];
+        _nearestBuilding = _nearestBuildList select 0;
+        if(!isNil "_nearestBuilding") then
+        {
+            _buildOwner = _nearestBuilding getVariable['OwnerPUID','0'];
+            if(s_demolish == -1) then {
+                if (_buildOwner == _ownerID) then {    
+                    ExcavateVeh = vehicle player;            
+                    s_demolish = ExcavateVeh addaction [("<t color=""#ff0000"">" + format["Demolish %1",typeOf(_nearestBuilding)] +"</t>"),"origins\demolish.sqf",_nearestBuilding,6,false,true,"",""];
+                    sleep 5;
+                };
+            } else {
+                ExcavateVeh removeAction s_demolish;
+                s_demolish = -1;
+            };
+        } else {
+            if(!isNil "ExcavateVeh") then {
+                ExcavateVeh removeAction s_demolish;
+                s_demolish = -1;
+            };
+        };        
+    } else {
+        ExcavateVeh removeAction bucketIn;
+        bucketIn = -1;
+        ExcavateVeh removeAction bucketOut;
+        bucketOut = -1;
+        ExcavateVeh removeAction s_demolish;
+        s_demolish = -1;
+    };
 	if (DZE_HeliLift) then {
 		_liftHeli = objNull;
 		_found = false;
@@ -581,7 +774,7 @@ _isTrader = _typeOfCursorTarget in ["Hooker1","Hooker2","Hooker3","Hooker4","RU_
 	
 	
 	If(DZE_AllowCargoCheck) then {
-		if((_isVehicle || _isTent || _isnewstorage) && _isAlive && !_isMan && !locked _cursorTarget) then {
+		if((_isVehicle || _isTent || _isnewstorage || _typeOfCursorTarget in DZE_Origins_Buildings) && _isAlive && !_isMan && !locked _cursorTarget) then {
 			if (s_player_checkGear < 0) then {
 				s_player_checkGear = player addAction [localize "STR_EPOCH_PLAYER_CARGO", "\z\addons\dayz_code\actions\cargocheck.sqf",_cursorTarget, 1, true, true, "", ""];
 			};

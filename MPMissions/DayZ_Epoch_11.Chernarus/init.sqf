@@ -54,8 +54,9 @@ dayz_tameDogs = true;
 DynamicVehicleDamageLow = 0; // Default: 0
 DynamicVehicleDamageHigh = 100; // Default: 100
 
+DZE_Origins_Building_System = true;
 DZE_BuildOnRoads = true; // Default: False
-
+DZE_Use_PlotPole4Life = true;//origins
 DZE_requireplot = 1;
 DZE_teleport = [14000,14000,14000,14000,14000];
 DZE_StaticConstructionCount = 1;
@@ -122,13 +123,15 @@ snowchance = 5; //5% chance to snow on server start/restart
 
 //Load in compiled functions
 call compile preprocessFileLineNumbers "fixes\variables.sqf";
+call compile preprocessFileLineNumbers "origins\config.sqf";
 progressLoadingScreen 0.2;
 call compile preprocessFileLineNumbers "fixes\publicEH.sqf";				//Initilize the publicVariable event handlers
 progressLoadingScreen 0.3;
 call compile preprocessFileLineNumbers "\z\addons\dayz_code\medical\setup_functions_med.sqf";	//Functions used by CLIENT for medical
 progressLoadingScreen 0.4;
 call compile preprocessFileLineNumbers "ZSC\gold\ZSCinit.sqf";
-call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\compiles.sqf";				//Compile regular functions
+call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\compiles.sqf";
+call compile preprocessFileLineNumbers "origins\compiles.sqf";				//Compile regular functions
 progressLoadingScreen 0.5;
 call compile preprocessFileLineNumbers "fixes\compiles.sqf";
 progressLoadingScreen 0.6;

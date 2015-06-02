@@ -339,6 +339,12 @@ dayz_resetSelfActions = {
 	s_givemoney_dialog = -1;
 	s_bank_dialog = -1;
 	s_bank_dialog2 = -1;
+	 sub_down = -1;
+	  sub_up = -1;
+bucketIn = -1;
+bucketOut = -1;
+s_demolish = -1;
+
 
 };
 call dayz_resetSelfActions;

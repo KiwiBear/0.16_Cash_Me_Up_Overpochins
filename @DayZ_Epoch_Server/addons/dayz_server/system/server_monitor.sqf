@@ -56,7 +56,18 @@ if (isServer && isNil "sm_done") then {
 	
 	_BuildingQueue = [];
 	_objectQueue = [];
-	
+	_originsQueue = [];
+	//Define arrays
+	owner_B1 = [];
+	owner_B2 = [];
+	owner_B3 = [];
+	owner_H1 = [];
+	owner_H2 = [];
+	owner_H3 = [];
+	owner_SG = [];
+	owner_LG = [];
+	owner_KING = [];
+	owner_SH = [];
 	if ((_hiveResponse select 0) == "ObjectStreamStart") then {
 	
 		// save superkey
@@ -69,15 +80,26 @@ if (isServer && isNil "sm_done") then {
 		_objectCount = _hiveResponse select 1;
 		_bQty = 0;
 		_vQty = 0;
+		_oQty = 0;
 		for "_i" from 1 to _objectCount do {
+			_isOrigins = false;
 			_hiveResponse = _key call server_hiveReadWriteLarge;
 			//diag_log (format["HIVE dbg %1 %2", typeName _hiveResponse, _hiveResponse]);
-			if ((_hiveResponse select 2) isKindOf "ModularItems") then {
-				_BuildingQueue set [_bQty,_hiveResponse];
-				_bQty = _bQty + 1;
-			} else {
-				_objectQueue set [_vQty,_hiveResponse];
-				_vQty = _vQty + 1;
+			{
+				if((_hiveResponse select 2) isKindOf _x) exitWith {
+					_originsQueue set [_oQty,_hiveResponse];
+					_oQty = _oQty + 1;
+					_isOrigins = true;
+				};
+			} forEach DZE_Origins_Buildings;
+			if(!_isOrigins) then {
+				if ((_hiveResponse select 2) isKindOf "ModularItems") then {
+					_BuildingQueue set [_bQty,_hiveResponse];
+					_bQty = _bQty + 1;
+				} else {
+					_objectQueue set [_vQty,_hiveResponse];
+					_vQty = _vQty + 1;
+				};
 			};
 		};
 		diag_log ("HIVE: got " + str(_bQty) + " Epoch Objects and " + str(_vQty) + " Vehicles");
@@ -257,7 +279,7 @@ if (isServer && isNil "sm_done") then {
 				}else{
 					_object setVariable ["bankMoney", 0, true];
 				};
-				if (_type in DZE_LockedStorage) then {
+				if (_type in DZE_LockedStorage || _type in DZE_Origins_Buildings) then {
 					// Fill variables with loot
 					_object setVariable ["WeaponCargo", (_intentory select 0),true];
 					_object setVariable ["MagazineCargo", (_intentory select 1),true];
@@ -341,11 +363,36 @@ if (isServer && isNil "sm_done") then {
 					serverVehicleCounter set [count serverVehicleCounter,_type];
 				};
 			};
-
+			//Origins
+			if(_type in DZE_Origins_Buildings) then {
+				//diag_log format["Origins Object: %1 - %2", _type,_ownerID];
+				_object setVariable ["CanBeUpdated",false, true];
+				{
+					_object setVariable ["OwnerUID",(_x select 0), true];
+					_object setVariable ["OwnerName",(_x select 1), true];
+				}   count _hitPoints;
+				_ownerUID = _object getVariable ["OwnerUID","0"];
+				switch(_type) do {
+					case "Uroven1DrevenaBudka"  : { owner_B1 set [count owner_B1, _ownerUID];};
+					case "Uroven2KladaDomek"    : { owner_B2 set [count owner_B2, _ownerUID];};
+					case "Uroven3DrevenyDomek"  : { owner_B3 set [count owner_B3, _ownerUID];};
+					case "Uroven1VelkaBudka"    : { owner_H1 set [count owner_H1, _ownerUID];};
+					case "Uroven2MalyDomek"     : { owner_H2 set [count owner_H2, _ownerUID];};
+					case "Uroven3VelkyDomek"    : { owner_H3 set [count owner_H3, _ownerUID];};
+					case "malaGaraz"            : { owner_SG set [count owner_SG, _ownerUID];};
+					case "velkaGaraz"           : { owner_LG set [count owner_LG, _ownerUID];};
+					case "kingramida"           : { owner_KING set [count owner_KING, _ownerUID];};
+					case "krepost"              : { owner_SH set [count owner_SH, _ownerUID];};
+				};
+				if((_pos select 2) < 0.25) then {
+					_object setVectorUp surfaceNormal position _object;
+				};
+				_object setVectorUp surfaceNormal position _object;
+			}; 
 			//Monitor the object
 			PVDZE_serverObjectMonitor set [count PVDZE_serverObjectMonitor,_object];
 		};
-	} count (_BuildingQueue + _objectQueue);
+	} count (_BuildingQueue + _originsQueue + _objectQueue);
 	// # END SPAWN OBJECTS # 
 
 	// preload server traders menu data into cache
@@ -517,6 +564,8 @@ if (isServer && isNil "sm_done") then {
 	[] ExecVM "\z\addons\dayz_server\DZMS\DZMSInit.sqf";
 	//DZMSHotSpots
 	[] ExecVM "\z\addons\dayz_server\DZMSHotSpots\DZMSHotSpotsInit.sqf";
+	//origins
+	[] ExecVM "\z\addons\dayz_server\origins\variables.sqf";
 	allowConnection = true;	
 	sm_done = true;
 	publicVariable "sm_done";
