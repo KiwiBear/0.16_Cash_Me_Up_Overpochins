@@ -103,9 +103,25 @@ _object_damage = {
 		{
 			_hit = [_object,_x] call object_getHit;
 			_selection = getText (configFile >> "CfgVehicles" >> (typeOf _object) >> "HitPoints" >> _x >> "name");
+			if (_selection in Ori_VehicleUpgrades) then {_dam = 0;}; //prevent double writtings
 			if (_hit > 0) then {_array set [count _array,[_selection,_hit]]};
 			_object setHit ["_selection", _hit];
 		} count _hitpoints;
+		
+		 if (typeOf _object in Ori_VehiclesList) then {
+        _cfg = configFile >> "CfgVehicles" >> (typeOf _object) >> "AnimationSources";
+        _tc = count _cfg;
+                for "_mti" from 0 to _tc-1 do {
+                _mt = (_cfg select _mti);
+                _st = getText(_mt >> "source");
+                if (_st in Ori_VehicleUpgrades) then {
+                _hit = _object getVariable [_st,1];
+                _object animate [_st,_hit];
+                _array set [count _array,[_st,_hit]];
+
+                };
+            };
+        };
 	
 		_key = format["CHILD:306:%1:%2:%3:",_objectID,_array,_damage];
 		//diag_log ("HIVE: WRITE: "+ str(_key));

@@ -311,8 +311,13 @@ if (isServer && isNil "sm_done") then {
 				{
 					_selection = _x select 0;
 					_dam = _x select 1;
-					if (_selection in dayZ_explosiveParts && _dam > 0.8) then {_dam = 0.8};
-					[_object,_selection,_dam] call object_setFixServer;
+					if (_selection in Ori_VehicleUpgrades) then {
+                        _object animate [_selection,_dam];
+                        _object setVariable [_selection,_dam,true];
+                    } else {   
+                        if (_selection in dayZ_explosiveParts and _dam > 0.8) then {_dam = 0.8};
+                        [_object,_selection,_dam] call object_setFixServer;
+                    };
 				} count _hitpoints;
 				
 				_object setFuel _fuel;
